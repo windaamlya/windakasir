@@ -63,6 +63,8 @@ flutter:
   assets:
     - asset/image/kue.png
     - asset/image/appSplash.png
+    - asset/image/donat.png
+    - asset/image/renna.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,23 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:windakasir/pelanggan/index.dart';
+import 'package:windakasir/penjualan/index.dart';
+import 'package:windakasir/produk/index.dart';
 
- class HomePage extends StatelessWidget {
+class Homepage extends StatefulWidget {
+  const Homepage({super.key});
+
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return DefaultTabController(length: 4, child: 
+    Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.pink[200],
-        title: Text('Home Page'),
-        centerTitle: true,
+        bottom: TabBar(
+          tabs: [
+            Tab(icon: Icon(Icons.inventory), text: 'Produk'),
+            Tab(icon: Icon(Icons.people), text: 'pelanggan'),
+            Tab(icon: Icon(Icons.shopping_cart), text: 'Penjualan',)
+          ]
+        )
       ),
-      body: Center(
-        child: Text(
-          'Welcome to the Home Page!',
-          style: TextStyle(
-            fontSize: 24.0,
-            color: Colors.pink[200],
-          ),
-        ),
+      body: TabBarView(
+        children: [
+          produkTab(),
+          pelangganTab(),
+          penjualanTab(),
+
+        ]
       ),
+    )
     );
   }
 }
