@@ -2,45 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:windakasir/homepage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AddPelanggan extends StatefulWidget {
-  const AddPelanggan({super.key});
+class EditProduk extends StatefulWidget {
+  final int ProdukID;
+
+  const EditProduk({super.key,required this.ProdukID});
 
   @override
-  State<AddPelanggan> createState() => _AddPelangganState();
+  State<EditProduk> createState() => _EditProdukState();
 }
 
-class _AddPelangganState extends State<AddPelanggan> {
-  final _namapelanggan = TextEditingController();
-  final _alamat = TextEditingController();
-  final _notlp = TextEditingController();
+class _EditProdukState extends State<EditProduk> {
+  final _namaproduk = TextEditingController();
+  final _harga = TextEditingController();
+  final _stok = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  @override
+  void initState(){
+    super.initState();
+    _loadProdukData();
+  }
 
 
-  Future<void> langgan() async {
+  Future<void> _loadProdukData() async {
+    final data = await Supabase.instance.client
+    .from('produk')
+    .select()
+    .eq('ProdukID', widget.ProdukID)
+    .single();
+
+  setState(() {
+    _namaproduk.text = data['NamaProduk'] ?? '';
+    _harga.text = (data['Harga'] ?? 0).toString();
+    _stok.text = (data['Stok'] ?? 0).toString();
+  });
+  }
+
+  Future<void> updateProduk() async {
     if (_formKey.currentState!.validate()) {
-      final String NamaPelanggan = _namapelanggan.text;
-      final String Alamat = _alamat.text;
-      final String NomorTelepon = _notlp.text;
 
-      final response  = await Supabase.instance.client.from('pelanggan').insert(
-        {
-          'NamaPelanggan': NamaPelanggan,
-          'Alamat': Alamat,
-          'NomorTelepon': NomorTelepon,
-        }
+      await Supabase.instance.client.from('produk').update({
+        'NamaProduk': _namaproduk.text,
+        'Harga': _harga.text,
+        'Stok': _stok.text,
+      }).eq('ProdukID', widget.ProdukID);
+
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Homepage()),
       );
-      if (response == null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Homepage()),
-        );
-      } else {
-       Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Homepage()),
-        );
-      }
     }
   }
 
@@ -48,7 +59,7 @@ class _AddPelangganState extends State<AddPelanggan> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Pelanggan'),
+        title: const Text('Edit Produk'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -58,12 +69,11 @@ class _AddPelangganState extends State<AddPelanggan> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
-                controller: _namapelanggan,
+                controller: _namaproduk,
                 decoration: const InputDecoration(
-                  labelText: 'Nama Pelanggan',
+                  labelText: 'Nama Produk',
                   border: OutlineInputBorder(),
                 ),
-                
                 validator: (value){
                   if (value == null || value.isEmpty) {
                     return 'Nama tidak boleh kosong';
@@ -71,40 +81,39 @@ class _AddPelangganState extends State<AddPelanggan> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
-                controller: _alamat,
+                controller: _harga,
                 decoration: const InputDecoration(
-                  labelText: 'Alamat',
+                  labelText: 'Harga',
                   border: OutlineInputBorder(),
                 ),
-                
                 validator: (value){
                   if (value == null || value.isEmpty) {
-                    return 'Alamat tidak boleh kosong';
+                    return 'Harga tidak boleh kosong';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _notlp,
+                controller: _stok,
                 decoration: const InputDecoration(
-                  labelText: 'Nomor Telepon',
+                  labelText: 'Stok',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
+                validator: (value){
                   if (value == null || value.isEmpty) {
-                    return 'Nomor tidak boleh kosong';
+                    return 'Nomor telepon tidak boleh kosong';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: langgan,
-                child: const Text('Tambah'),
-              )
+                onPressed: updateProduk,
+                child: const Text('Update'),
+              ),
             ],
           ),
         ),
@@ -112,3 +121,4 @@ class _AddPelangganState extends State<AddPelanggan> {
     );
   }
 }
+

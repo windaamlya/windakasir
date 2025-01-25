@@ -23,19 +23,20 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final roleController = TextEditingController();
   final SupabaseClient supabase = Supabase.instance.client;
 
   Future<void> _Login() async {
     final username = usernameController.text;
     final password = passwordController.text;
+    final role = roleController.text;
 
     try {
       final response = await supabase
           .from('user')
-          .select('username, password')
+          .select('username, password, role')
           .eq('username', username)
           .single();
-
       if (response != null && response['password'] == password) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login berhasil!')),
@@ -100,6 +101,19 @@ class _LoginPageState extends State<LoginPage> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
               obscureText: true,
+            ),
+          ),
+           Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              controller: roleController,
+              decoration: InputDecoration(
+                labelText: "Role",
+                icon: Icon(Icons.group, color: Colors.pink[300]),
+                fillColor: Colors.pink[50],
+                filled: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
           ),
           Center(

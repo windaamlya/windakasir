@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:windakasir/homepage.dart';
+import 'package:windakasir/produk/insert.dart';
+import 'package:windakasir/produk/update.dart';
 
 class produkTab extends StatefulWidget {
-  const produkTab({super.key});
-
   @override
-  State<produkTab> createState() => _produkTabState();
+  _produkTabState createState() => _produkTabState();
 }
 
 class _produkTabState extends State<produkTab> {
@@ -16,10 +15,10 @@ class _produkTabState extends State<produkTab> {
   @override
   void initState() {
     super.initState();
-    fetchproduk();
+    fetchProduk();
   }
 
-  Future<void> fetchproduk() async {
+  Future<void> fetchProduk() async {
     setState(() {
       isLoading = true;
     });
@@ -37,93 +36,100 @@ class _produkTabState extends State<produkTab> {
     }
   }
 
-  Future<void> deleteBook(int id) async {
-    await Supabase.instance.client.from('produk').delete().eq('ProdukID', id);
-    fetchproduk();
+  Future<void> deleteProduk(int ProdukID) async {
+    try {
+      await Supabase.instance.client.from('produk').delete().eq('ProdukID', ProdukID);
+      fetchProduk();
+    } catch (e) {
+      print('Error deleting produk: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : produk.isEmpty
-              ? const Center(
+      body:
+          produk.isEmpty
+              ? Center(
                   child: Text(
-                    'Tidak ada produk tersedia',
+                    'Tidak ada produk',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(8),
+               : ListView.builder(
+                  padding: EdgeInsets.all(8),
                   itemCount: produk.length,
                   itemBuilder: (context, index) {
                     final roduk = produk[index];
                     return Card(
                       elevation: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      margin: EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              roduk['NamaProduk'] ?? 'No produk',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20),
+                              roduk['NamaProduk']?.toString() ?? 'Produk tidak tersedia',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20,
+                              ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Text(
-                              roduk['Harga'] != null ? roduk ['Harga'].toString(): 'harga tidak tersedia',
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.grey),
+                              roduk['Harga']?.toString() ?? 'Harga Tidak tersedia',
+                              style: TextStyle(
+                                fontStyle: FontStyle.italic, fontSize: 16, color: Colors.grey,
+                              ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Text(
-                              roduk['Stok'] != null ? roduk['Stok'].toString(): 'Stok tidak tersedia',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                height: 1.4,
+                              roduk['Stok']?.toString() ?? 'Tidak tersedia',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14,
                               ),
                               textAlign: TextAlign.justify,
                             ),
-                            const SizedBox(height: 12),
                             const Divider(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.pink),
+                                  icon: const Icon(Icons.edit, color: Colors.blueAccent),
                                   onPressed: () {
-                                    // Aksi edit di sini
+                                    final ProdukID =
+                                     roduk['ProdukID'] ?? 0; // Pastikan ini sesuai dengan kolom di database
+                                    if (ProdukID != 0) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EditProduk(ProdukID: ProdukID)
+                                        ),
+                                      );
+                                    } else {
+                                      print('ID produk tidak valid');
+                                    }
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.redAccent),
+                                  icon: const Icon(Icons.delete, color: Colors.redAccent),
                                   onPressed: () {
                                     showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
                                         return AlertDialog(
                                           title: const Text('Hapus Produk'),
-                                          content: const Text(
-                                              'Apakah Anda yakin ingin menghapus produk ini?'),
+                                          content: const Text('Apakah Anda yakin ingin menghapus produk ini?'),
                                           actions: [
                                             TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
+                                              onPressed: () => Navigator.pop(context),
                                               child: const Text('Batal'),
                                             ),
                                             TextButton(
                                               onPressed: () {
-                                                deleteBook(roduk['id']);
+                                                deleteProduk(roduk['ProdukID']);
                                                 Navigator.pop(context);
                                               },
                                               child: const Text('Hapus'),
@@ -144,16 +150,12 @@ class _produkTabState extends State<produkTab> {
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigasi ke halaman untuk menambah buku baru
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const Homepage(),
-            ),
+            MaterialPageRoute(builder: (context) => AddProduk()),
           );
         },
-        backgroundColor: Colors.pink[200],
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }

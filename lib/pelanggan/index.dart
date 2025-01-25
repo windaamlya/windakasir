@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:windakasir/homepage.dart';
+import 'package:windakasir/pelanggan/insert.dart';
+import 'package:windakasir/pelanggan/update.dart';
 
-class pelangganTab extends StatefulWidget {
-  const pelangganTab({super.key});
-
+class PelangganTab extends StatefulWidget {
   @override
-  State<pelangganTab> createState() => _pelangganTabState();
+  _PelangganTabState createState() => _PelangganTabState();
 }
 
-class _pelangganTabState extends State<pelangganTab> {
+class _PelangganTabState extends State<PelangganTab> {
   List<Map<String, dynamic>> pelanggan = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchpelanggan();
+    fetchPelanggan();
   }
 
-  Future<void> fetchpelanggan() async {
+  Future<void> fetchPelanggan() async {
     setState(() {
       isLoading = true;
     });
@@ -37,94 +36,99 @@ class _pelangganTabState extends State<pelangganTab> {
     }
   }
 
-  Future<void> deleteBook(int id) async {
-    await Supabase.instance.client.from('pelanggan').delete().eq('PelangganID', id);
-    fetchpelanggan();
+  Future<void> deletePelanggan(int PelangganID) async {
+    try {
+      await Supabase.instance.client.from('pelanggan').delete().eq('PelangganID', PelangganID);
+      fetchPelanggan();
+    } catch (e) {
+      print('Error deleting pelanggan: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : pelanggan.isEmpty
-              ? const Center(
+      body:
+          pelanggan.isEmpty
+              ? Center(
                   child: Text(
-                    'Tidak ada pelanggan tersedia',
+                    'Tidak ada pelanggan',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8),
                   itemCount: pelanggan.length,
                   itemBuilder: (context, index) {
                     final langgan = pelanggan[index];
                     return Card(
                       elevation: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      margin: EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              langgan['NamaPelanggan'] ?? 'No pelanggan',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20),
+                              langgan['NamaPelanggan'] ?? 'Pelanggan tidak tersedia',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20,
+                              ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Text(
-                              langgan['Alamat'] ?? 'No Alamat',
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontStyle: FontStyle.italic,
-                                  color: Colors.grey),
+                              langgan['Alamat'] ?? 'Alamat Tidak tersedia',
+                              style: TextStyle(
+                                fontStyle: FontStyle.italic, fontSize: 16, color: Colors.grey,
+                              ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8),
                             Text(
-                              langgan['NomorTelepon'] ?? 'No Notlp',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                height: 1.4,
+                              langgan['NomorTelepon'] ?? 'Tidak tersedia',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14,
                               ),
                               textAlign: TextAlign.justify,
                             ),
-                            const SizedBox(height: 12),
                             const Divider(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.pink),
+                                  icon: const Icon(Icons.edit, color: Colors.blueAccent),
                                   onPressed: () {
-                                    // Aksi edit di sini
+                                    final PelangganID = langgan['PelangganID'] ?? 0; // Pastikan ini sesuai dengan kolom di database
+                                    if (PelangganID != 0) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EditPelanggan(PelangganID: PelangganID)
+                                        ),
+                                      );
+                                    } else {
+                                      print('ID pelanggan tidak valid');
+                                    }
                                   },
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete,
-                                      color: Colors.redAccent),
+                                  icon: const Icon(Icons.delete, color: Colors.redAccent),
                                   onPressed: () {
                                     showDialog(
                                       context: context,
                                       builder: (BuildContext context) {
                                         return AlertDialog(
                                           title: const Text('Hapus Pelanggan'),
-                                          content: const Text(
-                                              'Apakah Anda yakin ingin menghapus pelanggan ini?'),
+                                          content: const Text('Apakah Anda yakin ingin menghapus pelanggan ini?'),
                                           actions: [
                                             TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
+                                              onPressed: () => Navigator.pop(context),
                                               child: const Text('Batal'),
                                             ),
                                             TextButton(
                                               onPressed: () {
-                                                deleteBook(langgan['id']);
+                                                deletePelanggan(langgan['PelangganID']);
                                                 Navigator.pop(context);
                                               },
                                               child: const Text('Hapus'),
@@ -145,16 +149,12 @@ class _pelangganTabState extends State<pelangganTab> {
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigasi ke halaman untuk menambah buku baru
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const Homepage(),
-            ),
+            MaterialPageRoute(builder: (context) => AddPelanggan()),
           );
         },
-        backgroundColor: Colors.pink[200],
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
       ),
     );
   }
