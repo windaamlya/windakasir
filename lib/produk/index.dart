@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:windakasir/detailpenjualan.dart';
 import 'package:windakasir/produk/insert.dart';
 import 'package:windakasir/produk/update.dart';
 
@@ -61,7 +62,13 @@ class _produkTabState extends State<produkTab> {
                   itemCount: produk.length,
                   itemBuilder: (context, index) {
                     final roduk = produk[index];
-                    return Card(
+                    return InkWell(
+                     onTap: () {
+                       Navigator.push(context, 
+                       MaterialPageRoute(builder: (context) => ProdukDetailPage(produk: roduk)));
+                     },
+                    child: 
+                    Card(
                       elevation: 4,
                       margin: EdgeInsets.symmetric(vertical: 8),
                       shape: RoundedRectangleBorder(
@@ -145,6 +152,7 @@ class _produkTabState extends State<produkTab> {
                           ],
                         ),
                       ),
+                    )
                     );
                   },
                 ),

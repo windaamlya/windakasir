@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:windakasir/homepage.dart';
+import 'package:windakasir/homepage%20copy.dart';
 
 String supabeseUrl = 'https://elbezejjyepzcdaqabaa.supabase.co';
 String supabeseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsYmV6ZWpqeWVwemNkYXFhYmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyOTg4NTIsImV4cCI6MjA1MTg3NDg1Mn0.xM3xDfpjbZ5w6T1oZ5Y1Hc-u7RfJHgC_cb4pTEavbFQ';
@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Homepage()),
+          MaterialPageRoute(builder: (context) => AdminHomepage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:windakasir/homepage.dart';
+import 'package:windakasir/homepage%20copy.dart';
 
 String supabeseUrl = 'https://elbezejjyepzcdaqabaa.supabase.co';
 String supabeseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsYmV6ZWpqeWVwemNkYXFhYmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyOTg4NTIsImV4cCI6MjA1MTg3NDg1Mn0.xM3xDfpjbZ5w6T1oZ5Y1Hc-u7RfJHgC_cb4pTEavbFQ';
@@ -11,16 +11,16 @@ void main() async {
     url:'https://elbezejjyepzcdaqabaa.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsYmV6ZWpqeWVwemNkYXFhYmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYyOTg4NTIsImV4cCI6MjA1MTg3NDg1Mn0.xM3xDfpjbZ5w6T1oZ5Y1Hc-u7RfJHgC_cb4pTEavbFQ',
   );
-  runApp(LoginPage());
+  runApp(Register());
 }
 
 
-class LoginPage extends StatefulWidget {
+class Register extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<Register> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final roleController = TextEditingController();
@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Homepage()),
+          MaterialPageRoute(builder: (context) => AdminHomepage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -62,19 +62,13 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.pink[200],
-        title: Text("Login Kasir"),
+        title: Text("Register"),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            margin: EdgeInsets.only(top: 20),
-            height: 200,
-            width: double.infinity,
-            child: Image.asset('asset/image/kue.png'),
-          ),
           Center(
-            child: Text("Login", style: TextStyle(fontSize: 30, color: Colors.pink[300])),
+            child: Text("Register", style: TextStyle(fontSize: 30, color: Colors.pink[300])),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -93,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: TextField(
               controller: passwordController,
-              decoration: InputDecoration(
+              decoration: InputDecoration( 
                 labelText: "Password",
                 icon: Icon(Icons.vpn_key_sharp, color: Colors.pink[300]),
                 fillColor: Colors.pink[50],
@@ -116,13 +110,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
+          SizedBox(height: 20),
           Center(
             child: ElevatedButton(
               onPressed: _Login,
-              child: Text("Login"),
+              child: Text("Register"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pink[200],
-                fixedSize: Size(100, 30),
               ),
             ),
           ),

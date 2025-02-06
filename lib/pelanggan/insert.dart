@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:windakasir/homepage.dart';
+import 'package:windakasir/homepage%20copy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddPelanggan extends StatefulWidget {
@@ -33,12 +33,12 @@ class _AddPelangganState extends State<AddPelanggan> {
       if (response == null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Homepage()),
+          MaterialPageRoute(builder: (context) => AdminHomepage()),
         );
       } else {
        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Homepage()),
+          MaterialPageRoute(builder: (context) => AdminHomepage()),
         );
       }
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:windakasir/homepage.dart';
+import 'package:windakasir/penjualan/insert.dart';
+import 'package:windakasir/penjualan/update.dart';
 
 class penjualanTab extends StatefulWidget {
   const penjualanTab({super.key});
@@ -37,7 +38,7 @@ class _penjualanTabState extends State<penjualanTab> {
     }
   }
 
-  Future<void> deleteBook(int id) async {
+  Future<void> deletepenjualan(int id) async {
     await Supabase.instance.client.from('penjualan').delete().eq('PenjualanID', id);
     fetchpenjualan();
   }
@@ -85,7 +86,7 @@ class _penjualanTabState extends State<penjualanTab> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              jualan['PelangganID'] != null ? jualan['PelanggganID'].toString() : 'PelangganID Tidak Tersedia',
+                              jualan['PelangganID'] ?.toString() ?? 'PelangganID Tidak Tersedia',
                               style: const TextStyle(
                                 fontSize: 14,
                                 height: 1.4,
@@ -101,7 +102,18 @@ class _penjualanTabState extends State<penjualanTab> {
                                   icon: const Icon(Icons.edit,
                                       color: Colors.pink),
                                   onPressed: () {
-                                    // Aksi edit di sini
+                                    final PenjualanID =
+                                     jualan['PenjualanID'] ?? 0; // Pastikan ini sesuai dengan kolom di database
+                                    if (PenjualanID != 0) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => EditPenjualan(PenjualanID: PenjualanID)
+                                        ),
+                                      );
+                                    } else {
+                                      print('ID produk tidak valid');
+                                    }
                                   },
                                 ),
                                 IconButton(
@@ -123,7 +135,7 @@ class _penjualanTabState extends State<penjualanTab> {
                                             ),
                                             TextButton(
                                               onPressed: () {
-                                                deleteBook(jualan['id']);
+                                                deletepenjualan(jualan['PenjualanID']);
                                                 Navigator.pop(context);
                                               },
                                               child: const Text('Hapus'),
@@ -148,7 +160,7 @@ class _penjualanTabState extends State<penjualanTab> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const Homepage(),
+              builder: (context) => AddPenjualan(),
             ),
           );
         },

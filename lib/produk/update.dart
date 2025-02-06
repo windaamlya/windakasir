@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:windakasir/homepage.dart';
+import 'package:windakasir/homepage%20copy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class EditProduk extends StatefulWidget {
@@ -50,7 +50,7 @@ class _EditProdukState extends State<EditProduk> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Homepage()),
+        MaterialPageRoute(builder: (context) => AdminHomepage()),
       );
     }
   }
