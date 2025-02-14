@@ -23,7 +23,7 @@ class _DetailPenjualanTabState extends State<DetailPenjualanTab> {
       isLoading = true;
     });
     try {
-      final response = await Supabase.instance.client.from('detailpenjualan').select();
+      final response = await Supabase.instance.client.from('detailpenjualan').select('*, penjualan(*, pelanggan(*)), produk(*)');
       setState(() {
         detaill = List<Map<String, dynamic>>.from(response);
         isLoading = false;
@@ -60,11 +60,11 @@ class _DetailPenjualanTabState extends State<DetailPenjualanTab> {
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(width: 28),
-                    Text('Penjualan ID: ${detail['PenjualanID']?.toString() ?? 'tidak tersedia'}',
+                    Text('Penjualan ID: ${detail['penjualan']['pelanggan']['NamaPelanggan']?.toString() ?? 'tidak tersedia'}',
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(width: 28),
-                    Text('Produk ID: ${detail['ProdukID']?.toString() ?? 'tidak tersedia'}',
+                    Text('Produk ID: ${detail['produk']['NamaProduk']?.toString() ?? 'tidak tersedia'}',
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(width: 28),

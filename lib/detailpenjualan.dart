@@ -15,40 +15,86 @@ class _ProdukDetailPageState extends State<ProdukDetailPage> {
   int TotalHarga = 0;
   int stokakhir = 0;
   int stokawal = 0;
+  int? selectedPelangganID;
+  List<Map<String, dynamic>> pelangganlist = [];
 
-  // Fungsi untuk memperbarui jumlah pesanan
+  @override
+  void initState() {
+    super.initState();
+    stokawal = widget.produk['Stok'] ?? 0; // Set stok awal dari produk
+    fetchpelanggan();
+  }
+
+  Future<void> fetchpelanggan() async {
+    final supabase = Supabase.instance.client;
+    try {
+      final response = await supabase.from('pelanggan').select('PelangganID, NamaPelanggan');
+      if (response.isNotEmpty) {
+        setState(() {
+          pelangganlist = List<Map<String, dynamic>>.from(response);
+          selectedPelangganID = pelangganlist.first['PelangganID'];
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengambil data pelanggan: $e')),
+      );
+    }
+  }
+
   void updateJumlahPesanan(int harga, int delta) {
     setState(() {
-      stokakhir = stokawal - delta;
-      if (stokakhir < 0) stokakhir = 0; 
+      if (delta > 0 && JumlahPesanan >= stokawal) return; // Cegah melebihi stok
+
       JumlahPesanan += delta;
-      if (JumlahPesanan < 0) JumlahPesanan = 0; // Tidak boleh negatif
+      if (JumlahPesanan < 0) JumlahPesanan = 0;
+
+      stokakhir = stokawal - JumlahPesanan;
       TotalHarga = JumlahPesanan * harga;
-      if (TotalHarga < 0) TotalHarga = 0; // Tidak boleh negatif
     });
   }
 
-  // Fungsi untuk menyimpan data ke tabel detailpenjualan
-  Future<void> insertDetailPenjualan(int ProdukID, int PenjualanID, int JumlahPesanan, int TotalHarga) async {
+  Future<void> simpan() async {
     final supabase = Supabase.instance.client;
+    final produkid = widget.produk['ProdukID'];
+
+    if (produkid == null || selectedPelangganID == null || JumlahPesanan <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Semua Wajib Diisi')),
+      );
+      return;
+    }
 
     try {
-      final response = await supabase.from('detailpenjualan').insert({
-        'ProdukID': ProdukID,
-        'PenjualanID': PenjualanID,
-        'JumlahProduk': JumlahPesanan,
-        'Subtotal': TotalHarga,
-      });
+      final penjualan = await supabase.from('penjualan').insert({
+        'TotalHarga': TotalHarga,
+        'PelangganID': selectedPelangganID,
+      }).select().single();
 
-      if (response.error == null) {
+      if (penjualan.isNotEmpty) {
+        final PenjualanID = penjualan['PenjualanID'];
+        await supabase.from('detailpenjualan').insert({
+          'PenjualanID': PenjualanID,
+          'ProdukID': produkid,
+          'JumlahProduk': JumlahPesanan,
+          'Subtotal': TotalHarga,
+        }).select().single();
+
+        await supabase.from('produk').update({
+          'Stok': stokawal - JumlahPesanan,
+        }).match({'ProdukID': produkid});
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pesanan berhasil disimpan!')),
+          const SnackBar(content: Text('Pesanan berhasil disimpan')),
         );
-      } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminHomepage()));
+
+        Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => AdminHomepage()));
       }
     } catch (e) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AdminHomepage()));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
@@ -56,8 +102,6 @@ class _ProdukDetailPageState extends State<ProdukDetailPage> {
   Widget build(BuildContext context) {
     final produk = widget.produk;
     final Harga = produk['Harga'] ?? 0;
-    final ProdukID = produk['ProdukID'] ?? 0;
-    final PenjualanID = 1; // Contoh ID Penjualan (harus diganti sesuai logika Anda)
 
     return Scaffold(
       appBar: AppBar(
@@ -92,25 +136,37 @@ class _ProdukDetailPageState extends State<ProdukDetailPage> {
                   const SizedBox(height: 16),
                   Text('Harga: $Harga', style: const TextStyle(fontSize: 20)),
                   const SizedBox(height: 16),
-                  Text('Stok: ${produk['Stok'] ?? 'Tidak Tersedia'}', style: const TextStyle(fontSize: 20)),
+                  Text('Stok: $stokawal', style: const TextStyle(fontSize: 20)),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<int>(
+                    value: selectedPelangganID,
+                    items: pelangganlist.map((pelanggan) {
+                      return DropdownMenuItem<int>(
+                        value: pelanggan['PelangganID'],
+                        child: Text(pelanggan['NamaPelanggan']),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedPelangganID = value;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Pilih Pelanggan',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          updateJumlahPesanan(Harga, -1);
-                        },
+                        onPressed: () => updateJumlahPesanan(Harga, -1),
                         icon: const Icon(Icons.remove),
                       ),
-                      Text(
-                        '$JumlahPesanan',
-                        style: const TextStyle(fontSize: 20),
-                      ),
+                      Text('$JumlahPesanan', style: const TextStyle(fontSize: 20)),
                       IconButton(
-                        onPressed: () {
-                          updateJumlahPesanan(Harga, 1);
-                        },
+                        onPressed: () => updateJumlahPesanan(Harga, 1),
                         icon: const Icon(Icons.add),
                       ),
                     ],
@@ -126,7 +182,7 @@ class _ProdukDetailPageState extends State<ProdukDetailPage> {
                       ElevatedButton(
                         onPressed: () async {
                           if (JumlahPesanan > 0) {
-                          await insertDetailPenjualan(ProdukID, PenjualanID, JumlahPesanan, TotalHarga);
+                            await simpan();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Jumlah pesanan harus lebih dari 0')),
